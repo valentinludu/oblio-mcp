@@ -179,7 +179,7 @@ export const createOblioMcpServer = () => {
     "get_nomenclatures",
     {
       type: z.union([
-        z.literal("product"), // produse
+        z.literal("products"), // produse
         z.literal("companies"), // companiile asociate contului
         z.literal("clients"), // clienti
         z.literal("vat_rates"), // rate de TVA
@@ -812,7 +812,7 @@ export const createOblioMcpServer = () => {
       offset: z.string().optional(),
     },
     ({ name, code, management, workStation, offset }) => ({
-      description: "Get products nomenclature",
+      description: "Get product(s) nomenclature",
       messages: [
         {
           role: "user",
@@ -826,7 +826,7 @@ export const createOblioMcpServer = () => {
                   workStation: ${workStation}
                   offset: ${offset}
 
-                  You can use the get_nomenclatures tool with the type "product" to get the products nomenclature. The details above are filters and need to be written as key/value pairs. Make sure name or/and code is provided. Management, Work Station and Offset are optional.`,
+                  You can use the get_nomenclatures tool with the type "products" to get the products nomenclature. The details above are filters and need to be written as key/value pairs. Make sure name or/and code is provided. Management, Work Station and Offset are optional.`,
           },
         },
       ],
