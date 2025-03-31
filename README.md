@@ -110,16 +110,16 @@ MCP Server for the Oblio API, enabling Claude and other MCP compatible platforms
 
 ## Setup
 
-1. Create an Oblio Account:
+1. Create or login into your Oblio Account:
 
-   - Visit the Oblio website
+   - Visit https://www.oblio.eu
    - Create an account if you don't have one
    - Log in to your account
 
 2. Get API Credentials:
 
    - Navigate to your account settings
-   - Generate API credentials
+   - Get your API credentials
    - Save your API email and secret
 
 ### Usage with Claude Desktop
