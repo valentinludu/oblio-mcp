@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "MCP server for Oblio accounting software. Perfect for Claude and other MCP compatible platforms.",
   "homepage": "https://github.com/valentinludu/oblio-mcp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/valentinludu/oblio-mcp.git"
+  },
   "bugs": "https://github.com/valentinludu/oblio-mcp/issues",
   "author": "Valentin Ludu",
   "license": "ISC",
