@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { createOblioMcpServer } from "./mcpServer.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 

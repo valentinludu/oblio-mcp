@@ -16,6 +16,9 @@
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "oblio-mcp": "dist/index.js"
+  },
   "scripts": {
     "build": "rm -rf dist && tsc && shx chmod +x dist/*.js",
     "prepare": "npm run build",
