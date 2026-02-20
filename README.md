@@ -1,4 +1,4 @@
-# Oblio MCP Server
+# Oblio.eu accounting MCP Server (Unofficial)
 
 MCP Server for the [Oblio API](https://www.oblio.eu/api), enabling Claude and other MCP-compatible platforms to interact with [Oblio.eu](https://www.oblio.eu) accounting software.
 
@@ -18,7 +18,7 @@ Create invoices, manage documents, collect payments, query nomenclatures, and su
    - Copy your **email** and **API secret**
    - Note your **company CIF** (e.g. `RO37311090`)
 
-2. **Add to your Claude Desktop config** (`claude_desktop_config.json`):
+2. **Add to your Claude Desktop config or other AI tool** (`claude_desktop_config.json`):
 
 ### Using npx (coming soon)
 
