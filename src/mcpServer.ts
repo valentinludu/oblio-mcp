@@ -3,6 +3,36 @@ import { z } from "zod";
 import { oblioClient } from "./oblioClient.js";
 import { createDocumentInputSchema, collectSchema } from "./schema.js";
 
+/**
+ * Extract a useful message from any thrown value.
+ *
+ * The Oblio SDK throws `OblioApiException`, which carries the API's
+ * `statusMessage` on `.message` but does not extend `Error`. Falling back to
+ * `String(error)` for non-Error throwables yields `"[object Object]"` and
+ * hides the actual API error. This helper looks for the common message
+ * fields (`message`, `statusMessage`) before giving up.
+ */
+const formatError = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (error && typeof error === "object") {
+    const err = error as { message?: unknown; statusMessage?: unknown };
+    if (typeof err.message === "string" && err.message.length > 0) {
+      return err.message;
+    }
+    if (typeof err.statusMessage === "string" && err.statusMessage.length > 0) {
+      return err.statusMessage;
+    }
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+  return String(error);
+};
+
 export const createOblioMcpServer = () => {
   const server = new McpServer({
     name: "oblio-server",
@@ -44,7 +74,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error creating document: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error creating document: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -94,7 +124,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error getting document: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error getting document: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -153,7 +183,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error deleting document: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error deleting document: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -206,7 +236,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error cancelling document: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error cancelling document: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -259,7 +289,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error restoring document: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error restoring document: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -327,7 +357,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error getting nomenclatures: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error getting nomenclatures: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -374,7 +404,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error collecting payment: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error collecting payment: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -502,7 +532,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error listing documents: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error listing documents: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -548,7 +578,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error sending e-invoice to SPV: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error sending e-invoice to SPV: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -591,7 +621,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error getting e-invoice archive: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error getting e-invoice archive: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -635,7 +665,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error setting CIF: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error setting CIF: ${formatError(error)}`,
             },
           ],
           isError: true,
@@ -674,7 +704,7 @@ export const createOblioMcpServer = () => {
           content: [
             {
               type: "text",
-              text: `Error getting CIF: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error getting CIF: ${formatError(error)}`,
             },
           ],
           isError: true,
