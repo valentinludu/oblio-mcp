@@ -6,7 +6,7 @@ Create invoices, manage documents, collect payments, query nomenclatures, and su
 
 ## Prerequisites
 
-- Node.js >= 22.0.0
+- Node.js >= 24 with npm >= 11.14 (bundled with Node.js 24.18+)
 - Docker (optional)
 - An active [Oblio.eu](https://www.oblio.eu) account with API access
 

@@ -1,22 +1,37 @@
-name: Pull Request
+name: CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     name: Type Check & Build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
-      - name: Setup Node.js 22
+      - name: Setup Node.js 24
         uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
+          # The runner's cached Node 24 may bundle an npm older than engines.npm.
+          check-latest: true
           cache: "npm"
 
       - name: Install dependencies
