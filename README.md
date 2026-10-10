@@ -104,7 +104,7 @@ Pass the same variables through the MCP client. `docker run -e` forwards them in
 | `create_document`  | Creates an invoice (factura), proforma, or delivery notice (aviz). Requires client details, at least one product, a series name, and issue date. Returns the created document's series, number, and link. |
 | `get_document`     | Retrieves a single document by type, series name, and number. Returns document details, link, and payment history.                                                                                        |
 | `list_documents`   | Lists and filters documents with pagination. Supports filtering by series, date range, client, draft/cancelled/collected status. Returns up to 100 results per page.                                      |
-| `delete_document`  | Permanently deletes a document. Only the last document in a series can be deleted. Optionally removes the associated payment.                                                                             |
+| `delete_document`  | Permanently deletes a document. Only the last document in a series can be deleted. Optionally removes the associated payment, and accepts an idempotency key so the same delete is not processed twice. |
 | `cancel_document`  | Cancels (annuls) a document, marking it as void. The document remains in the system.                                                                                                                      |
 | `restore_document` | Restores a previously cancelled document, making it active again.                                                                                                                                         |
 
@@ -125,7 +125,7 @@ Pass the same variables through the MCP client. `docker run -e` forwards them in
 | Tool                   | Description                                                                                                                             |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `create_einvoice`      | Submits an existing invoice to Romania's SPV system for e-Factura. Returns status code: 0=processing, 1=success, 2=errors, -1=not sent. |
-| `get_einvoice_archive` | Downloads the e-Invoice archive (XML) from SPV for a previously submitted invoice.                                                      |
+| `get_einvoice_archive` | Downloads the e-Invoice archive from SPV for a previously submitted invoice. Returns the file as a base64 resource, or JSON when the API responds with JSON. |
 
 ### Configuration
 

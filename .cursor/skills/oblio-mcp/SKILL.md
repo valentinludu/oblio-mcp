@@ -122,6 +122,7 @@ Step 1: Submit → create_einvoice(seriesName: "FCT", number: 55)
         Check returned code: 0=processing, 1=success, 2=errors, -1=not sent
 
 Step 2: Download archive → get_einvoice_archive(seriesName: "FCT", number: 55)
+        A file comes back as a base64 resource (ZIP or XML). A JSON body is returned as text.
 ```
 
 ### 8. Find Invoices for a Date Range
@@ -138,7 +139,7 @@ list_documents(type: "invoice", filters: {
 ### 9. Cancel vs Delete
 
 - **Cancel** (`cancel_document`): marks the document as void. Can be restored later with `restore_document`. Works on any document.
-- **Delete** (`delete_document`): permanently removes. Only works on the last document in a series. Cannot be undone.
+- **Delete** (`delete_document`): permanently removes. Only works on the last document in a series. Cannot be undone. Set `deleteCollect: true` to also remove the linked payment (invoices only). Pass `idempotencyKey` so the same delete is not processed twice.
 
 ## Key Data Relationships
 
@@ -179,6 +180,8 @@ list_documents(type: "invoice", filters: {
 - Always call `get_nomenclatures(type: "series")` before creating a document to get valid series names.
 - The `list_documents` filters use nested client objects: `{ client: { cif: "..." } }`, not flat keys.
 - Only the last document in a series can be deleted. Use `cancel_document` instead for non-last documents.
+- When deleting an invoice that has a collected payment, set `deleteCollect: true` on `delete_document` to remove that payment too.
+- Pass `idempotencyKey` on `delete_document` to avoid processing the same delete twice.
 - Payment `value` defaults to the full invoice amount when omitted.
 - Product `price` in `create_document` is a string, not a number.
 - `vatIncluded: 1` means the price already includes VAT (default). Set to `0` for net prices.
