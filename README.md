@@ -1,4 +1,4 @@
-# Oblio.eu accounting MCP Server (Unofficial)
+# Oblio.eu accounting MCP Server
 
 MCP Server for the [Oblio API](https://www.oblio.eu/api), enabling Claude and other MCP-compatible platforms to interact with [Oblio.eu](https://www.oblio.eu) accounting software.
 
@@ -6,8 +6,7 @@ Create invoices, manage documents, collect payments, query nomenclatures, and su
 
 ## Prerequisites
 
-- Node.js >= 24 with npm >= 11.14 (bundled with Node.js 24.18+)
-- Docker (optional)
+- Node.js >= 24 and npm >= 11.14. Node.js 24.18 and later already include a new enough npm (24.18 bundles npm 11.16). Node.js 24.17 and earlier bundle npm 11.13, which is too old.
 - An active [Oblio.eu](https://www.oblio.eu) account with API access
 
 ## Setup
@@ -15,45 +14,25 @@ Create invoices, manage documents, collect payments, query nomenclatures, and su
 ### 1. Get your Oblio API credentials
 
 - Log in at [oblio.eu](https://www.oblio.eu)
-- Go to **Setari > Date Cont**
-- Copy your **email** and **API secret**
-- Note your **company CIF** (e.g. `RO37311090`)
+- Email and API secret: **Setari > Date Cont** ([account settings](https://www.oblio.eu/account/settings))
+- Company CIF: **Setari > Date firma** (e.g. `RO37311090`)
 
-### 2. Add to your Claude Desktop config
+Oblio regenerates the API secret whenever the account password is reset.
 
-Environment variables are passed through the MCP client configuration:
+### 2. Add the server to your MCP client
 
-Add to your Claude Desktop config or other MCP-compatible AI tool (`claude_desktop_config.json`):
+Add the server to your MCP client config, such as Claude Desktop's `claude_desktop_config.json` or Cursor's `mcp.json`. The server speaks stdio only.
 
-### Using npx (coming soon)
-
-Once the package is published to npm, no installation will be required:
-
-```json
-{
-  "mcpServers": {
-    "oblio": {
-      "command": "npx",
-      "args": ["-y", "oblio-mcp"],
-      "env": {
-        "OBLIO_API_EMAIL": "your-email@example.com",
-        "OBLIO_API_SECRET": "your-api-secret",
-        "CIF": "your-company-cif"
-      }
-    }
-  }
-}
-```
-
-### Using a local clone (recommended)
+### Local clone
 
 ```bash
 git clone https://github.com/valentinludu/oblio-mcp.git
 cd oblio-mcp
 npm install
+npm run build
 ```
 
-Then add to your config:
+`npm install` does not build the project. `dist/index.js` is produced by `npm run build`.
 
 ```json
 {
@@ -71,11 +50,13 @@ Then add to your config:
 }
 ```
 
-### Using Docker
+### Docker
 
 ```bash
 docker build -t oblio-mcp .
 ```
+
+Pass the same variables through the MCP client. `docker run -e` forwards them into the container:
 
 ```json
 {
@@ -108,19 +89,11 @@ docker build -t oblio-mcp .
 
 ### Required
 
-| Variable           | Description                    |
-| ------------------ | ------------------------------ |
-| `OBLIO_API_EMAIL`  | Your Oblio account email       |
-| `OBLIO_API_SECRET` | API secret from Oblio settings |
-
-### Optional
-
-| Variable      | Description                             | Default |
-| ------------- | --------------------------------------- | ------- |
-| `CIF`         | Company CIF (can also be set via API)   | None    |
-| `LOG_LEVEL`   | Logging level: error, warn, info, debug | `info`  |
-| `API_TIMEOUT` | API request timeout in milliseconds     | `30000` |
-| `PORT`        | Server port for future HTTP transport   | None    |
+| Variable           | Description                              |
+| ------------------ | ---------------------------------------- |
+| `OBLIO_API_EMAIL`  | Your Oblio account email                 |
+| `OBLIO_API_SECRET` | API secret from Oblio settings           |
+| `CIF`              | Company CIF from **Setari > Date firma** |
 
 ## Tools
 
@@ -131,7 +104,7 @@ docker build -t oblio-mcp .
 | `create_document`  | Creates an invoice (factura), proforma, or delivery notice (aviz). Requires client details, at least one product, a series name, and issue date. Returns the created document's series, number, and link. |
 | `get_document`     | Retrieves a single document by type, series name, and number. Returns document details, link, and payment history.                                                                                        |
 | `list_documents`   | Lists and filters documents with pagination. Supports filtering by series, date range, client, draft/cancelled/collected status. Returns up to 100 results per page.                                      |
-| `delete_document`  | Permanently deletes a document. Only the last document in a series can be deleted. Optionally removes the associated payment.                                                                             |
+| `delete_document`  | Permanently deletes a document. Only the last document in a series can be deleted. Optionally removes the associated payment, and accepts an idempotency key so the same delete is not processed twice. |
 | `cancel_document`  | Cancels (annuls) a document, marking it as void. The document remains in the system.                                                                                                                      |
 | `restore_document` | Restores a previously cancelled document, making it active again.                                                                                                                                         |
 
@@ -152,7 +125,7 @@ docker build -t oblio-mcp .
 | Tool                   | Description                                                                                                                             |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `create_einvoice`      | Submits an existing invoice to Romania's SPV system for e-Factura. Returns status code: 0=processing, 1=success, 2=errors, -1=not sent. |
-| `get_einvoice_archive` | Downloads the e-Invoice archive (XML) from SPV for a previously submitted invoice.                                                      |
+| `get_einvoice_archive` | Downloads the e-Invoice archive from SPV for a previously submitted invoice. Returns the file as a base64 resource, or JSON when the API responds with JSON. |
 
 ### Configuration
 
@@ -171,9 +144,9 @@ If you encounter issues:
 
 1. Verify your Oblio account is active and has API access
 2. Check that `OBLIO_API_EMAIL` and `OBLIO_API_SECRET` are correctly set
-3. Ensure your company CIF is set (via `CIF` env var or the `set_cif` tool)
-4. Confirm you have the necessary permissions for the operations you're performing
-5. For debugging, set `LOG_LEVEL=debug` in your MCP client configuration
+3. If authentication fails after a password reset, copy the new API secret from **Setari > Date Cont**
+4. Ensure your company CIF is set (via the `CIF` env var or the `set_cif` tool)
+5. Confirm you have the necessary permissions for the operations you're performing
 
 ## License
 

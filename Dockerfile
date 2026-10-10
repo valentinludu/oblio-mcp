@@ -1,30 +1,24 @@
+# Node 24.18+ ships npm 11.16. Earlier 24.x images bundle npm 11.13.
 FROM node:24-alpine AS builder
-
-# Must be entire project because `prepare` script is run during `npm install` and requires all files.
-COPY ./ /app
 
 WORKDIR /app
 
-RUN --mount=type=cache,target=/root/.npm npm install
-# Make sure the build is completed
+COPY package.json package-lock.json tsconfig.json ./
+COPY src ./src
+
+RUN --mount=type=cache,target=/root/.npm npm ci
 RUN npm run build
 
 FROM node:24-alpine AS release
 
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/package-lock.json /app/package-lock.json
-COPY --from=builder /app/node_modules /app/node_modules
-COPY --from=builder /app/.env /app/.env
-
-ENV NODE_ENV=production
-ENV DEBUG=*
-
 WORKDIR /app
 
-# Use safer debugging approach
-RUN find /app/dist -type f | sort || echo "No dist files found"
-RUN find /app/node_modules/@modelcontextprotocol -type d | sort || echo "MCP SDK not found"
+ENV NODE_ENV=production
 
-# Use the ESM entry point with debug flags
-ENTRYPOINT ["node", "--trace-warnings", "--trace-uncaught", "--inspect=0.0.0.0:9229", "--env-file=.env", "dist/index.js"]
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev
+COPY --from=builder /app/dist ./dist
+
+USER node
+
+ENTRYPOINT ["node", "dist/index.js"]

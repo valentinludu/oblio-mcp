@@ -1,9 +1,18 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { FileResponse } from "@obliosoftware/oblioapi";
 import { z } from "zod";
 import { createOblioClient } from "./oblioClient.js";
 import { formatError } from "./errors.js";
 import { createDocumentInputSchema, collectSchema } from "./schema.js";
 import type { EnvConfig } from "./config.js";
+
+const isFileResponse = (value: unknown): value is FileResponse =>
+  typeof value === "object" &&
+  value !== null &&
+  "file" in value &&
+  Buffer.isBuffer(value.file) &&
+  "mimeType" in value &&
+  typeof value.mimeType === "string";
 
 export const createOblioMcpServer = (config: EnvConfig) => {
   const oblioClient = createOblioClient(config);
@@ -141,7 +150,13 @@ export const createOblioMcpServer = (config: EnvConfig) => {
     },
     async ({ type, seriesName, number, deleteCollect, idempotencyKey }) => {
       try {
-        const response = await oblioClient.delete(type, seriesName, number);
+        const response = await oblioClient.delete(
+          type,
+          seriesName,
+          number,
+          deleteCollect,
+          idempotencyKey,
+        );
         return {
           content: [{ type: "text", text: JSON.stringify(response, null, 2) }],
         };
@@ -509,10 +524,7 @@ export const createOblioMcpServer = (config: EnvConfig) => {
     },
     async ({ seriesName, number }) => {
       try {
-        const response = await oblioClient.createDoc("einvoice", {
-          seriesName,
-          number,
-        });
+        const response = await oblioClient.sendEinvoice(seriesName, number);
         return {
           content: [{ type: "text", text: JSON.stringify(response, null, 2) }],
         };
@@ -535,9 +547,10 @@ export const createOblioMcpServer = (config: EnvConfig) => {
     {
       title: "Get e-Invoice Archive from SPV",
       description:
-        "Downloads the e-Invoice archive (XML) from Romania's SPV system via GET /api/docs/einvoice. " +
+        "Downloads the e-Invoice archive from Romania's SPV system via GET /api/docs/einvoice. " +
         "The invoice must have been previously submitted to SPV. " +
-        "Returns the SPV archive data for the specified invoice.",
+        "A file download is returned as a base64 resource with its MIME type. " +
+        "If the API responds with JSON, that body is returned as text.",
       inputSchema: {
         seriesName: z.string().describe("Invoice series name (e.g. FCT)"),
         number: z.number().describe("Invoice number"),
@@ -551,7 +564,27 @@ export const createOblioMcpServer = (config: EnvConfig) => {
     },
     async ({ seriesName, number }) => {
       try {
-        const response = await oblioClient.get("einvoice", seriesName, number);
+        const response = await oblioClient.getEinvoice(seriesName, number);
+        if (isFileResponse(response)) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  `Downloaded e-invoice archive for ${seriesName} ${number} ` +
+                  `(${response.mimeType}, ${response.file.length} bytes).`,
+              },
+              {
+                type: "resource",
+                resource: {
+                  uri: `oblio://einvoice/${encodeURIComponent(seriesName)}/${number}`,
+                  mimeType: response.mimeType,
+                  blob: response.file.toString("base64"),
+                },
+              },
+            ],
+          };
+        }
         return {
           content: [{ type: "text", text: JSON.stringify(response, null, 2) }],
         };
