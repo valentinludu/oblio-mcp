@@ -9,7 +9,7 @@
   },
   "bugs": "https://github.com/valentinludu/oblio-mcp/issues",
   "author": "Valentin Ludu",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module",
   "keywords": [
     "oblio",

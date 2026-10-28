@@ -153,4 +153,4 @@ If you encounter issues:
 
 ## License
 
-ISC
+[MIT](LICENSE)

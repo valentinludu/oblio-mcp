@@ -7,7 +7,7 @@
   },
   "homepage": "https://github.com/valentinludu/oblio-mcp",
   "repository": "https://github.com/valentinludu/oblio-mcp",
-  "license": "ISC",
+  "license": "MIT",
   "keywords": ["oblio", "accounting", "invoicing", "e-factura", "romania"],
   "skills": ["./.cursor/skills/"],
   "userConfig": {
