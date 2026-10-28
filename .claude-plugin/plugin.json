@@ -9,7 +9,7 @@
   "repository": "https://github.com/valentinludu/oblio-mcp",
   "license": "MIT",
   "keywords": ["oblio", "accounting", "invoicing", "e-factura", "romania"],
-  "skills": ["./.cursor/skills/"],
+  "skills": ["./.agents/skills/"],
   "userConfig": {
     "oblio_api_email": {
       "type": "string",
