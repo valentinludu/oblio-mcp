@@ -1,0 +1,45 @@
+{
+  "name": "oblio-mcp",
+  "version": "1.0.0",
+  "description": "Oblio.eu accounting: create invoices, manage documents, collect payments, query nomenclatures, and submit e-Factura to SPV.",
+  "author": {
+    "name": "Valentin Ludu"
+  },
+  "homepage": "https://github.com/valentinludu/oblio-mcp",
+  "repository": "https://github.com/valentinludu/oblio-mcp",
+  "license": "MIT",
+  "keywords": ["oblio", "accounting", "invoicing", "e-factura", "romania"],
+  "skills": ["./.cursor/skills/"],
+  "userConfig": {
+    "oblio_api_email": {
+      "type": "string",
+      "title": "Oblio account email",
+      "description": "Email from Setari > Date Cont on oblio.eu",
+      "required": true
+    },
+    "oblio_api_secret": {
+      "type": "string",
+      "title": "Oblio API secret",
+      "description": "API secret from Setari > Date Cont on oblio.eu. Oblio regenerates it when the account password is reset.",
+      "required": true,
+      "sensitive": true
+    },
+    "cif": {
+      "type": "string",
+      "title": "Company CIF",
+      "description": "Company tax ID from Setari > Date firma, e.g. RO37311090",
+      "required": true
+    }
+  },
+  "mcpServers": {
+    "oblio": {
+      "command": "npx",
+      "args": ["-y", "oblio-mcp"],
+      "env": {
+        "OBLIO_API_EMAIL": "${user_config.oblio_api_email}",
+        "OBLIO_API_SECRET": "${user_config.oblio_api_secret}",
+        "CIF": "${user_config.cif}"
+      }
+    }
+  }
+}
