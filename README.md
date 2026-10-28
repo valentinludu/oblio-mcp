@@ -4,6 +4,8 @@ MCP Server for the [Oblio API](https://www.oblio.eu/api), enabling Claude and ot
 
 Create invoices, manage documents, collect payments, query nomenclatures, and submit e-Factura to Romania's SPV system -- all through natural language.
 
+> This project is independent of Oblio. It uses their public API and the `@obliosoftware/oblioapi` package.
+
 ## Prerequisites
 
 - Node.js >= 24 and npm >= 11.14. Node.js 24.18 and later already include a new enough npm (24.18 bundles npm 11.16). Node.js 24.17 and earlier bundle npm 11.13, which is too old.
@@ -19,9 +21,38 @@ Create invoices, manage documents, collect payments, query nomenclatures, and su
 
 Oblio regenerates the API secret whenever the account password is reset.
 
-### 2. Add the server to your MCP client
+### 2. Add the server in Claude Desktop
 
-Add the server to your MCP client config, such as Claude Desktop's `claude_desktop_config.json` or Cursor's `mcp.json`. The server speaks stdio only.
+In Claude Desktop settings, add the marketplace `https://github.com/valentinludu/oblio-mcp`, then install the `oblio-mcp` plugin. Claude asks for your Oblio email, API secret, and company CIF. Node.js has to be installed, because the plugin starts the server with `npx`.
+
+Claude Code can add the same marketplace from a shell:
+
+```bash
+claude plugin marketplace add valentinludu/oblio-mcp
+claude plugin install oblio-mcp@oblio
+```
+
+The shell install does not ask for credentials. In a Claude Code session, run `/plugin configure oblio-mcp@oblio` and enter your Oblio email, API secret, and company CIF.
+
+### Other apps
+
+Apps that take an MCP server config can use the same npm package. No clone or build is needed.
+
+```json
+{
+  "mcpServers": {
+    "oblio": {
+      "command": "npx",
+      "args": ["-y", "oblio-mcp"],
+      "env": {
+        "OBLIO_API_EMAIL": "your-email@example.com",
+        "OBLIO_API_SECRET": "your-api-secret",
+        "CIF": "your-company-cif"
+      }
+    }
+  }
+}
+```
 
 ### Local clone
 
@@ -40,41 +71,6 @@ npm run build
     "oblio": {
       "command": "node",
       "args": ["/path/to/oblio-mcp/dist/index.js"],
-      "env": {
-        "OBLIO_API_EMAIL": "your-email@example.com",
-        "OBLIO_API_SECRET": "your-api-secret",
-        "CIF": "your-company-cif"
-      }
-    }
-  }
-}
-```
-
-### Docker
-
-```bash
-docker build -t oblio-mcp .
-```
-
-Pass the same variables through the MCP client. `docker run -e` forwards them into the container:
-
-```json
-{
-  "mcpServers": {
-    "oblio": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "OBLIO_API_EMAIL",
-        "-e",
-        "OBLIO_API_SECRET",
-        "-e",
-        "CIF",
-        "oblio-mcp"
-      ],
       "env": {
         "OBLIO_API_EMAIL": "your-email@example.com",
         "OBLIO_API_SECRET": "your-api-secret",
@@ -104,7 +100,7 @@ Pass the same variables through the MCP client. `docker run -e` forwards them in
 | `create_document`  | Creates an invoice (factura), proforma, or delivery notice (aviz). Requires client details, at least one product, a series name, and issue date. Returns the created document's series, number, and link. |
 | `get_document`     | Retrieves a single document by type, series name, and number. Returns document details, link, and payment history.                                                                                        |
 | `list_documents`   | Lists and filters documents with pagination. Supports filtering by series, date range, client, draft/cancelled/collected status. Returns up to 100 results per page.                                      |
-| `delete_document`  | Permanently deletes a document. Only the last document in a series can be deleted. Optionally removes the associated payment, and accepts an idempotency key so the same delete is not processed twice. |
+| `delete_document`  | Permanently deletes a document. Only the last document in a series can be deleted. Optionally removes the associated payment, and accepts an idempotency key so the same delete is not processed twice.   |
 | `cancel_document`  | Cancels (annuls) a document, marking it as void. The document remains in the system.                                                                                                                      |
 | `restore_document` | Restores a previously cancelled document, making it active again.                                                                                                                                         |
 
@@ -122,9 +118,9 @@ Pass the same variables through the MCP client. `docker run -e` forwards them in
 
 ### e-Factura (SPV)
 
-| Tool                   | Description                                                                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `create_einvoice`      | Submits an existing invoice to Romania's SPV system for e-Factura. Returns status code: 0=processing, 1=success, 2=errors, -1=not sent. |
+| Tool                   | Description                                                                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `create_einvoice`      | Submits an existing invoice to Romania's SPV system for e-Factura. Returns status code: 0=processing, 1=success, 2=errors, -1=not sent.                      |
 | `get_einvoice_archive` | Downloads the e-Invoice archive from SPV for a previously submitted invoice. Returns the file as a base64 resource, or JSON when the API responds with JSON. |
 
 ### Configuration
@@ -147,6 +143,13 @@ If you encounter issues:
 3. If authentication fails after a password reset, copy the new API secret from **Setari > Date Cont**
 4. Ensure your company CIF is set (via the `CIF` env var or the `set_cif` tool)
 5. Confirm you have the necessary permissions for the operations you're performing
+
+## Releasing
+
+1. Run `npm version 1.0.1 --no-git-tag-version` to update `package.json` and `package-lock.json`.
+2. Set the same version in `.claude-plugin/plugin.json`.
+3. Commit and push.
+4. Run `npm login` if you are not already logged in, then `npm run build && npm publish --access public`. `.npmrc` sets `ignore-scripts`, so `npm publish` does not build the package.
 
 ## License
 

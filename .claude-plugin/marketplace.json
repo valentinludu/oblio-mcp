@@ -1,0 +1,14 @@
+{
+  "name": "oblio",
+  "description": "Oblio.eu accounting tools for Claude",
+  "owner": {
+    "name": "Valentin Ludu"
+  },
+  "plugins": [
+    {
+      "name": "oblio-mcp",
+      "source": "./",
+      "description": "Oblio.eu accounting MCP server: invoices, payments, nomenclatures, and e-Factura"
+    }
+  ]
+}
