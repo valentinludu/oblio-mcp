@@ -60,10 +60,9 @@ Apps that take an MCP server config can use the same npm package. No clone or bu
 git clone https://github.com/valentinludu/oblio-mcp.git
 cd oblio-mcp
 npm install
-npm run build
 ```
 
-`npm install` does not build the project. `dist/index.js` is produced by `npm run build`.
+`npm install` runs `prepare`, which builds `dist/index.js`.
 
 ```json
 {
@@ -149,7 +148,7 @@ If you encounter issues:
 1. Run `npm version 1.0.1 --no-git-tag-version` to update `package.json` and `package-lock.json`.
 2. Set the same version in `.claude-plugin/plugin.json`.
 3. Commit and push.
-4. Run `npm login` if you are not already logged in, then `npm run build && npm publish --access public`. `.npmrc` sets `ignore-scripts`, so `npm publish` does not build the package.
+4. Run `npm login` if you are not already logged in, then `npm stage publish --access public` or `npm publish --access public`. Both run `prepare`, which builds `dist/` before packing.
 
 ## License
 
